@@ -1,0 +1,12 @@
+# Binary
+api-platform
+
+# Data directory (local history storage)
+api-platform-data/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~

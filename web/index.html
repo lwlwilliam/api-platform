@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Platform</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<script>(function(){var t=localStorage.getItem('api-platform-theme')||'light';document.documentElement.setAttribute('data-theme',t);var l=document.createElement('link');l.id='hljs-theme';l.rel='stylesheet';l.href=t==='dark'?'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/atom-one-dark.min.css':'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/atom-one-light.min.css';document.head.appendChild(l);})()</script>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<div id="app">
+  <header class="header">
+    <div class="header-left">
+      <span class="logo">⚡ API Platform</span>
+    </div>
+    <div class="header-right">
+      <button id="btn-theme" class="btn btn-sm btn-icon" title="Toggle theme">🌙</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-tabs">
+        <button class="sidebar-tab active" data-stab="history">History</button>
+        <button class="sidebar-tab" data-stab="docs">Documents</button>
+      </div>
+
+      <!-- History Panel -->
+      <div class="sidebar-panel" id="panel-history">
+        <div class="sidebar-header">
+          <div class="sidebar-actions">
+            <input type="text" id="history-search" placeholder="Search..." class="input-sm">
+            <div class="sidebar-btn-row">
+              <button id="btn-select-all" class="btn btn-xs btn-outline">Select All</button>
+              <button id="btn-deselect-all" class="btn btn-xs btn-outline">None</button>
+              <button id="btn-clear-history" class="btn btn-xs btn-danger">Clear</button>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar-body" id="history-list">
+          <div class="sidebar-empty">No history yet. Send a request to get started.</div>
+        </div>
+        <div class="sidebar-footer">
+          <button id="btn-generate-docs" class="btn btn-sm btn-primary btn-full">Generate Docs</button>
+          <div class="config-row">
+            <label style="font-size:11px;color:var(--text-muted);white-space:nowrap">Timeout (s):</label>
+            <input type="number" id="config-timeout" class="input-sm" value="60" min="1" max="300" style="width:60px;text-align:center">
+            <button id="btn-save-config" class="btn btn-xs btn-outline">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Docs Panel -->
+      <div class="sidebar-panel hidden" id="panel-docs">
+        <div class="sidebar-header">
+          <div class="sidebar-actions">
+            <div class="sidebar-btn-row">
+              <button id="btn-docs-select-all" class="btn btn-xs btn-outline">Select All</button>
+              <button id="btn-docs-deselect-all" class="btn btn-xs btn-outline">None</button>
+              <button id="btn-docs-batch-delete" class="btn btn-xs btn-danger">Delete</button>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar-body" id="docs-list">
+          <div class="sidebar-empty">No documents saved yet. Select history entries and generate docs.</div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="content" id="main-content">
+      <!-- Request View -->
+      <div id="view-request">
+        <div class="request-panel">
+          <div class="request-bar">
+            <select id="method-select" class="method-select">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="PATCH">PATCH</option>
+              <option value="DELETE">DELETE</option>
+              <option value="HEAD">HEAD</option>
+              <option value="OPTIONS">OPTIONS</option>
+            </select>
+          <input type="text" id="url-input" class="url-input" placeholder="Enter request URL (e.g. https://api.example.com/users)">
+            <button id="btn-send" class="btn btn-primary">Send</button>
+            <button id="btn-clear" class="btn btn-outline btn-sm" title="Clear request & response">✕</button>
+          </div>
+
+          <div class="tabs" id="request-tabs">
+            <button class="tab active" data-tab="headers">Headers</button>
+            <button class="tab" data-tab="body">Body</button>
+          </div>
+
+          <div class="tab-content" id="tab-headers">
+            <div class="kv-editor" id="headers-editor">
+              <div class="kv-row">
+                <input type="text" class="kv-key" placeholder="Key" value="">
+                <input type="text" class="kv-value" placeholder="Value" value="">
+                <button class="btn btn-sm btn-icon kv-remove" title="Remove">×</button>
+              </div>
+            </div>
+            <button id="btn-add-header" class="btn btn-sm btn-link">+ Add Header</button>
+          </div>
+
+          <div class="tab-content hidden" id="tab-body">
+            <div class="body-type-tabs">
+              <button class="body-type-tab active" data-btype="raw">raw</button>
+              <button class="body-type-tab" data-btype="form-data">form-data</button>
+              <button class="body-type-tab" data-btype="url-form-encoded">x-www-form-urlencoded</button>
+            </div>
+
+            <div id="body-raw" class="body-panel">
+              <select id="raw-content-type" class="input-sm">
+                <option value="application/json">JSON</option>
+                <option value="application/xml">XML</option>
+                <option value="text/plain">Text</option>
+                <option value="text/html">HTML</option>
+                <option value="application/x-www-form-urlencoded">Form URL Encoded</option>
+              </select>
+              <textarea id="raw-body" class="body-textarea" placeholder='{"key": "value"}'></textarea>
+            </div>
+
+            <div id="body-formdata" class="body-panel hidden">
+              <div class="kv-editor" id="formdata-editor">
+                <div class="kv-row form-row">
+                  <input type="text" class="kv-key" placeholder="Key" value="">
+                  <div class="form-value-group">
+                    <input type="text" class="kv-value form-text-value" placeholder="Value" value="">
+                    <input type="file" class="form-file-input hidden">
+                    <span class="form-file-name"></span>
+                    <button class="btn btn-xs btn-toggle-file" title="Switch to file">📁</button>
+                  </div>
+                  <button class="btn btn-sm btn-icon kv-remove" title="Remove">×</button>
+                </div>
+              </div>
+              <button id="btn-add-formdata" class="btn btn-sm btn-link">+ Add Field</button>
+            </div>
+
+            <div id="body-urlencoded" class="body-panel hidden">
+              <div class="kv-editor" id="urlencoded-editor">
+                <div class="kv-row">
+                  <input type="text" class="kv-key" placeholder="Key" value="">
+                  <input type="text" class="kv-value" placeholder="Value" value="">
+                  <button class="btn btn-sm btn-icon kv-remove" title="Remove">×</button>
+                </div>
+              </div>
+              <button id="btn-add-urlencoded" class="btn btn-sm btn-link">+ Add Pair</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="response-panel" id="response-panel">
+        <div class="response-header">
+              <div class="response-status" id="response-status"></div>
+              <div class="response-meta">
+                <span id="response-time"></span>
+                <span id="response-size"></span>
+              </div>
+              <div class="response-tabs">
+                <button class="resp-tab active" data-rtab="body">Body</button>
+                <button class="resp-tab" data-rtab="headers">Headers</button>
+                <button class="resp-tab" data-rtab="request">Request</button>
+                <button class="resp-tab" data-rtab="raw">Raw</button>
+              </div>
+            </div>
+            <div class="response-header sub-header">
+              <div style="flex:1"></div>
+              <button class="view-toggle active" id="btn-view-pretty">Pretty</button>
+              <button class="view-toggle" id="btn-view-raw">Raw</button>
+            </div>
+            <div class="response-body" id="response-body">
+              <div class="response-placeholder">Send a request to see the response here.</div>
+            </div>
+            <div class="response-body hidden" id="response-headers-view">
+              <pre id="response-headers-content"></pre>
+            </div>
+            <div class="response-body hidden" id="response-request-view">
+              <pre id="response-request-content"></pre>
+            </div>
+            <div class="response-body hidden" id="response-raw-view">
+              <pre id="response-raw-content"></pre>
+            </div>
+        </div>
+      </div>
+
+      <!-- Document Viewer -->
+      <div id="view-doc" class="hidden">
+        <div class="doc-viewer-header">
+          <button id="btn-back-editor" class="btn btn-sm btn-outline">← Back to Editor</button>
+          <input type="text" id="doc-viewer-title" class="doc-title-edit" placeholder="Document title">
+          <div class="doc-viewer-actions">
+            <button id="btn-copy-doc-link" class="btn btn-sm btn-outline">Copy Share Link</button>
+          </div>
+        </div>
+        <div class="doc-viewer-body" id="doc-viewer-content"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Generate Docs Modal -->
+<div class="modal-overlay hidden" id="docs-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Save Documentation</h2>
+      <button class="btn btn-sm btn-icon modal-close">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" id="docs-save-title" class="input-sm" placeholder="e.g. User API" style="font-size:14px;padding:8px 12px;">
+      </div>
+      <div id="docs-modal-content" class="docs-content"></div>
+    </div>
+    <div class="modal-footer">
+      <button id="btn-copy-docs" class="btn btn-outline">Copy</button>
+      <button id="btn-download-docs" class="btn btn-outline">Download .md</button>
+      <button id="btn-save-docs" class="btn btn-primary">Save Document</button>
+    </div>
+    <div class="share-info hidden" id="share-info-box">
+      <span class="share-url" id="share-url-text"></span>
+      <button id="btn-copy-share" class="btn btn-xs btn-outline">Copy</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="confirm-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h2 id="confirm-title">Confirm</h2></div>
+    <div class="modal-body"><p id="confirm-message"></p></div>
+    <div class="modal-footer">
+      <button id="confirm-cancel" class="btn btn-outline">Cancel</button>
+      <button id="confirm-ok" class="btn btn-danger">Delete</button>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast hidden"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

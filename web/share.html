@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Documentation</title>
+<script>(function(){var t=localStorage.getItem('api-platform-theme')||'light';document.documentElement.setAttribute('data-theme',t);var l=document.createElement('link');l.id='hljs-theme';l.rel='stylesheet';l.href=t==='dark'?'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/atom-one-dark.min.css':'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/atom-one-light.min.css';document.head.appendChild(l);})()</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#1e1e2e;--bg2:#181825;--bg3:#313244;--border:#45475a;--text:#cdd6f4;--text2:#a6adc8;--muted:#585b70;--accent:#89b4fa;--success:#a6e3a1;--danger:#f38ba8;--warning:#fab387;--radius:8px}
+[data-theme="light"]{--bg:#fff;--bg2:#f4f5f7;--bg3:#e4e6ea;--border:#c1c7cd;--text:#1d1f24;--text2:#4b5362;--muted:#8b95a5;--accent:#0d6efd;--success:#198754;--danger:#dc3545;--warning:#fd7e14}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.container{max-width:960px;margin:0 auto;padding:32px 20px}
+.header{text-align:center;padding:32px 0 40px;border-bottom:1px solid var(--border);margin-bottom:32px}
+.header h1{font-size:24px;font-weight:700;margin-bottom:8px}
+.header .meta{color:var(--text2);font-size:13px}
+.doc-endpoint{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:20px;overflow:hidden;background:var(--bg2)}
+.doc-endpoint-header{display:flex;align-items:center;padding:12px 16px;background:var(--bg3);gap:10px}
+.doc-ep-method{font-size:12px;font-weight:700;padding:3px 10px;border-radius:4px;color:#fff;min-width:64px;text-align:center}
+.doc-ep-method.get{background:#89b4fa}.doc-ep-method.post{background:#a6e3a1}.doc-ep-method.put{background:#fab387}
+.doc-ep-method.patch{background:#cba6f7}.doc-ep-method.delete{background:#f38ba8}.doc-ep-method.head{background:#89dceb;color:#111}.doc-ep-method.options{background:#b4befe}
+.doc-ep-url{flex:1;font-family:"SF Mono","Fira Code",monospace;font-size:15px;font-weight:600;word-break:break-all}
+.doc-ep-status{font-size:12px;font-weight:600;padding:3px 10px;border-radius:4px;white-space:nowrap}
+.doc-ep-status.success{background:rgba(166,227,161,.15);color:var(--success)}
+.doc-ep-status.error{background:rgba(243,139,168,.15);color:var(--danger)}
+.doc-ep-status.redirect{background:rgba(250,179,135,.15);color:var(--warning)}
+.doc-endpoint-body{padding:16px 20px}
+.doc-endpoint-body h3{font-size:14px;margin:12px 0 8px;color:var(--text);font-weight:600}
+.doc-endpoint-body h3:first-child{margin-top:0}
+.doc-endpoint-body table{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:12px}
+.doc-endpoint-body th,.doc-endpoint-body td{border:1px solid var(--border);padding:6px 10px;text-align:left}
+.doc-endpoint-body th{background:var(--bg3);font-weight:600}
+.doc-endpoint-body pre{background:var(--bg);padding:12px 16px;border-radius:6px;overflow-x:auto;margin:6px 0 12px;font-size:13px;line-height:1.5}
+.doc-endpoint-body pre code{background:none!important;padding:0!important}
+.doc-endpoint-body blockquote{border-left:3px solid var(--accent);padding:6px 16px;color:var(--text2);margin:12px 0}
+.doc-endpoint-body p{margin:8px 0;line-height:1.65}
+.doc-endpoint-body ul,.doc-endpoint-body ol{padding-left:22px;margin:10px 0}
+.doc-endpoint-body li{margin:4px 0}
+.doc-endpoint-body code{background:var(--bg3);padding:2px 5px;border-radius:3px;font-size:12px;font-family:"SF Mono","Fira Code",monospace}
+.doc-endpoint-body strong{font-weight:600}
+.header h1{font-size:26px;font-weight:700;margin-bottom:8px}
+.header .meta{color:var(--text2);font-size:13px}
+.footer{text-align:center;padding:32px 0;color:var(--muted);font-size:12px;border-top:1px solid var(--border);margin-top:32px}
+.footer a{color:var(--accent);text-decoration:none}
+.spinner{width:20px;height:20px;border:2px solid rgba(137,180,250,.3);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;margin:40px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.theme-btn{position:fixed;top:16px;right:16px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;cursor:pointer;font-size:14px}
+.theme-btn:hover{background:var(--border)}
+</style>
+</head>
+<body>
+<button class="theme-btn" id="theme-btn" title="Toggle theme">☀️</button>
+<div class="container">
+  <div class="header">
+    <h1 id="doc-title">Loading...</h1>
+    <div class="meta" id="doc-meta"></div>
+  </div>
+  <div id="doc-content"><div class="spinner"></div></div>
+  <div class="footer">Generated by <strong>API Platform</strong></div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script>
+(function(){
+  var alias = location.pathname.replace(/^\/share\//,'');
+  if(!alias){document.getElementById('doc-content').innerHTML='<p style="text-align:center;color:var(--danger)">Invalid document</p>';return;}
+
+  // Theme toggle
+  var theme = localStorage.getItem('api-platform-theme') || 'light';
+  function applyTheme() {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.getElementById('theme-btn').textContent = theme === 'dark' ? '☀️' : '🌙';
+  }
+  document.getElementById('theme-btn').addEventListener('click', function() {
+    theme = theme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('api-platform-theme', theme);
+    applyTheme();
+  });
+  applyTheme();
+  // Lookup doc by alias
+  fetch('/api/docs/list').then(function(r){return r.json()}).then(function(docs){
+    var doc = docs.find(function(d){return d.alias === alias;});
+    if(!doc) throw new Error('not found');
+    document.title = doc.title + ' - API Docs';
+    document.getElementById('doc-title').textContent = doc.title;
+    document.getElementById('doc-meta').textContent = 'Created ' + new Date(doc.createdAt).toLocaleString();
+    render(doc.content);
+  }).catch(function(e){document.getElementById('doc-content').innerHTML='<p style="text-align:center;color:var(--danger)">Document not found</p>';});
+
+  function render(md){
+    if(typeof marked==='undefined'){document.getElementById('doc-content').innerHTML='<pre>'+esc(md)+'</pre>';return;}
+    var clean = md.replace(/<!--history-id:\d+-->/g,'');
+    // Split by ## headings
+    var parts = clean.split(/(?=^## )/m);
+    var html = '';
+    for(var i=0;i<parts.length;i++){
+      var s = parts[i].trim(); if(!s) continue;
+      var m = s.match(/^##\s+\d+\.\s+(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\s+(.+)/m);
+      if(m){
+        var method = m[1], url = m[2].trim();
+        var scMatch = s.match(/\*\*响应状态\*\*:\s*(\d+)/);
+        var statusCode = scMatch ? parseInt(scMatch[1]) : 0;
+        var sc = statusCode>=200&&statusCode<300?'success':(statusCode>=400?'error':(statusCode>=300?'redirect':''));
+        var body = s.split('\n').slice(1).join('\n');
+        html += '<div class="doc-endpoint"><div class="doc-endpoint-header">'+
+          '<span class="doc-ep-method '+method.toLowerCase()+'">'+method+'</span>'+
+          '<span class="doc-ep-url">'+esc(url)+'</span>'+
+          (statusCode?'<span class="doc-ep-status '+sc+'">'+statusCode+'</span>':'')+
+          '</div><div class="doc-endpoint-body">'+marked.parse(body)+'</div></div>';
+      }else{
+        html += marked.parse(s);
+      }
+    }
+    document.getElementById('doc-content').innerHTML = html;
+    requestAnimationFrame(function(){
+      document.querySelectorAll('pre code').forEach(function(el){if(typeof hljs!=='undefined')hljs.highlightElement(el);});
+    });
+  }
+
+  function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+})();
+</script>
+</body>
+</html>
