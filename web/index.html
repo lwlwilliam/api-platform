@@ -16,6 +16,10 @@
       <span class="logo">⚡ API Platform</span>
     </div>
     <div class="header-right">
+      <select id="lang-select" class="header-lang-select">
+        <option value="En">English</option>
+        <option value="中文">中文</option>
+      </select>
       <button id="btn-theme" class="btn btn-sm btn-icon" title="Toggle theme">🌙</button>
     </div>
   </header>
@@ -23,31 +27,34 @@
   <div class="main">
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-tabs">
-        <button class="sidebar-tab active" data-stab="history">History</button>
-        <button class="sidebar-tab" data-stab="docs">Documents</button>
+        <button class="sidebar-tab active" data-stab="history" data-i18n="history">History</button>
+        <button class="sidebar-tab" data-stab="docs" data-i18n="documents">Documents</button>
       </div>
 
       <!-- History Panel -->
       <div class="sidebar-panel" id="panel-history">
         <div class="sidebar-header">
+          <div class="sidebar-search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="history-search" data-i18n="searchRequests" placeholder="Search requests..." class="input-sm">
+          </div>
           <div class="sidebar-actions">
-            <input type="text" id="history-search" placeholder="Search..." class="input-sm">
             <div class="sidebar-btn-row">
-              <button id="btn-select-all" class="btn btn-xs btn-outline">Select All</button>
-              <button id="btn-deselect-all" class="btn btn-xs btn-outline">None</button>
-              <button id="btn-clear-history" class="btn btn-xs btn-danger">Clear</button>
+              <button id="btn-select-all" class="btn btn-xs btn-outline" data-i18n="selectAll">Select All</button>
+              <button id="btn-deselect-all" class="btn btn-xs btn-outline" data-i18n="none">None</button>
+              <button id="btn-delete-selected" class="btn btn-xs btn-outline-danger" data-i18n="delete">🗑 Delete</button>
             </div>
           </div>
         </div>
         <div class="sidebar-body" id="history-list">
-          <div class="sidebar-empty">No history yet. Send a request to get started.</div>
+          <div class="sidebar-empty" data-i18n="noHistory">No history yet. Send a request to get started.</div>
         </div>
         <div class="sidebar-footer">
-          <button id="btn-generate-docs" class="btn btn-sm btn-primary btn-full">Generate Docs</button>
+          <button id="btn-generate-docs" class="btn btn-sm btn-primary btn-full" data-i18n="generateDocs">Generate Docs</button>
           <div class="config-row">
-            <label style="font-size:11px;color:var(--text-muted);white-space:nowrap">Timeout (s):</label>
+            <label style="font-size:11px;color:var(--text-muted);white-space:nowrap" data-i18n="configTimeout">Timeout (s):</label>
             <input type="number" id="config-timeout" class="input-sm" value="60" min="1" max="300" style="width:60px;text-align:center">
-            <button id="btn-save-config" class="btn btn-xs btn-outline">Save</button>
+            <button id="btn-save-config" class="btn btn-xs btn-outline" data-i18n="save">Save</button>
           </div>
         </div>
       </div>
@@ -57,14 +64,18 @@
         <div class="sidebar-header">
           <div class="sidebar-actions">
             <div class="sidebar-btn-row">
-              <button id="btn-docs-select-all" class="btn btn-xs btn-outline">Select All</button>
-              <button id="btn-docs-deselect-all" class="btn btn-xs btn-outline">None</button>
-              <button id="btn-docs-batch-delete" class="btn btn-xs btn-danger">Delete</button>
+              <button id="btn-docs-select-all" class="btn btn-xs btn-outline" data-i18n="selectAll">Select All</button>
+              <button id="btn-docs-deselect-all" class="btn btn-xs btn-outline" data-i18n="none">None</button>
+            </div>
+            <div class="sidebar-btn-row">
+              <button id="btn-docs-batch-share" class="btn btn-xs btn-outline" data-i18n="share">🔗 Share</button>
+              <button id="btn-docs-batch-unshare" class="btn btn-xs btn-outline" data-i18n="unshare">🔗 Unshare</button>
+              <button id="btn-docs-batch-delete" class="btn btn-xs btn-outline-danger" data-i18n="delete">🗑 Delete</button>
             </div>
           </div>
         </div>
         <div class="sidebar-body" id="docs-list">
-          <div class="sidebar-empty">No documents saved yet. Select history entries and generate docs.</div>
+          <div class="sidebar-empty" data-i18n="noDocuments">No documents saved yet. Select history entries and generate docs.</div>
         </div>
       </div>
     </aside>
@@ -83,32 +94,37 @@
               <option value="HEAD">HEAD</option>
               <option value="OPTIONS">OPTIONS</option>
             </select>
-          <input type="text" id="url-input" class="url-input" placeholder="Enter request URL (e.g. https://api.example.com/users)">
-            <button id="btn-send" class="btn btn-primary">Send</button>
-            <button id="btn-clear" class="btn btn-outline btn-sm" title="Clear request & response">✕</button>
+          <input type="text" id="url-input" class="url-input" data-i18n="enterUrl" placeholder="Enter request URL (e.g. https://api.example.com/users)">
+            <button id="btn-send" class="btn btn-primary" data-i18n="send">Send</button>
+            <button id="btn-clear" class="btn btn-outline btn-sm" data-i18n="reset" title="Reset request & response">Reset</button>
           </div>
 
           <div class="tabs" id="request-tabs">
-            <button class="tab active" data-tab="headers">Headers</button>
-            <button class="tab" data-tab="body">Body</button>
+            <button class="tab active" data-tab="headers" data-i18n="headers">Headers</button>
+            <button class="tab" data-tab="body" data-i18n="body">Body</button>
           </div>
 
           <div class="tab-content" id="tab-headers">
             <div class="kv-editor" id="headers-editor">
+              <div class="kv-row">
+                <input type="text" class="kv-key" placeholder="Key" value="User-Agent">
+                <input type="text" class="kv-value" placeholder="Value" value="API-Platform/1.0">
+                <button class="btn btn-sm btn-icon kv-remove" title="Remove">×</button>
+              </div>
               <div class="kv-row">
                 <input type="text" class="kv-key" placeholder="Key" value="">
                 <input type="text" class="kv-value" placeholder="Value" value="">
                 <button class="btn btn-sm btn-icon kv-remove" title="Remove">×</button>
               </div>
             </div>
-            <button id="btn-add-header" class="btn btn-sm btn-link">+ Add Header</button>
+            <button id="btn-add-header" class="btn btn-sm btn-link" data-i18n="addHeader">+ Add Header</button>
           </div>
 
           <div class="tab-content hidden" id="tab-body">
             <div class="body-type-tabs">
-              <button class="body-type-tab active" data-btype="raw">raw</button>
-              <button class="body-type-tab" data-btype="form-data">form-data</button>
-              <button class="body-type-tab" data-btype="url-form-encoded">x-www-form-urlencoded</button>
+              <button class="body-type-tab active" data-btype="raw" data-i18n="raw">raw</button>
+              <button class="body-type-tab" data-btype="form-data" data-i18n="formData">form-data</button>
+              <button class="body-type-tab" data-btype="url-form-encoded" data-i18n="urlEncoded">x-www-form-urlencoded</button>
             </div>
 
             <div id="body-raw" class="body-panel">
@@ -147,6 +163,12 @@
                 </div>
               </div>
               <button id="btn-add-urlencoded" class="btn btn-sm btn-link">+ Add Pair</button>
+              <div class="bulk-toggle-bar">
+                <button id="btn-toggle-urlencoded-mode" class="btn btn-sm btn-link">Bulk Edit</button>
+              </div>
+              <div id="urlencoded-raw" class="hidden">
+                <textarea class="body-textarea" placeholder="key1=value1&amp;key2=value2" style="height:120px;"></textarea>
+              </div>
             </div>
           </div>
         </div>
@@ -159,19 +181,19 @@
                 <span id="response-size"></span>
               </div>
               <div class="response-tabs">
-                <button class="resp-tab active" data-rtab="body">Body</button>
-                <button class="resp-tab" data-rtab="headers">Headers</button>
-                <button class="resp-tab" data-rtab="request">Request</button>
-                <button class="resp-tab" data-rtab="raw">Raw</button>
+                <button class="resp-tab active" data-rtab="body" data-i18n="responseBody">Body</button>
+                <button class="resp-tab" data-rtab="headers" data-i18n="responseHeaders">Headers</button>
+                <button class="resp-tab" data-rtab="request" data-i18n="requestView">Request</button>
+                <button class="resp-tab" data-rtab="response" data-i18n="rawView">Raw</button>
               </div>
             </div>
             <div class="response-header sub-header">
               <div style="flex:1"></div>
-              <button class="view-toggle active" id="btn-view-pretty">Pretty</button>
-              <button class="view-toggle" id="btn-view-raw">Raw</button>
+              <button class="view-toggle active" id="btn-view-pretty" data-i18n="pretty">Pretty</button>
+              <button class="view-toggle" id="btn-view-raw" data-i18n="raw">Raw</button>
             </div>
             <div class="response-body" id="response-body">
-              <div class="response-placeholder">Send a request to see the response here.</div>
+              <div class="response-placeholder" data-i18n="sendPlaceholder">Send a request to see the response here.</div>
             </div>
             <div class="response-body hidden" id="response-headers-view">
               <pre id="response-headers-content"></pre>
@@ -188,10 +210,12 @@
       <!-- Document Viewer -->
       <div id="view-doc" class="hidden">
         <div class="doc-viewer-header">
-          <button id="btn-back-editor" class="btn btn-sm btn-outline">← Back to Editor</button>
-          <input type="text" id="doc-viewer-title" class="doc-title-edit" placeholder="Document title">
+          <button id="btn-back-editor" class="btn btn-sm btn-outline" data-i18n="backToEditor">← Back to Editor</button>
+          <input type="text" id="doc-viewer-title" class="doc-title-edit" data-i18n="documentTitle" placeholder="Document title">
           <div class="doc-viewer-actions">
-            <button id="btn-copy-doc-link" class="btn btn-sm btn-outline">Copy Share Link</button>
+            <button id="btn-toggle-share" class="btn btn-sm btn-outline" data-i18n="share">Share</button>
+            <button id="btn-copy-doc-link" class="btn btn-sm btn-outline" data-i18n="copyShareLink">Copy Share Link</button>
+            <button id="btn-download-doc" class="btn btn-sm btn-outline" data-i18n="download">Download</button>
           </div>
         </div>
         <div class="doc-viewer-body" id="doc-viewer-content"></div>
@@ -204,35 +228,45 @@
 <div class="modal-overlay hidden" id="docs-modal">
   <div class="modal">
     <div class="modal-header">
-      <h2>Save Documentation</h2>
+      <h2 data-i18n="saveDocumentModal">Save Documentation</h2>
       <button class="btn btn-sm btn-icon modal-close">×</button>
     </div>
     <div class="modal-body">
       <div class="form-group">
-        <label>Title</label>
-        <input type="text" id="docs-save-title" class="input-sm" placeholder="e.g. User API" style="font-size:14px;padding:8px 12px;">
+        <label data-i18n="documentTitle">Title</label>
+        <div class="save-mode-row">
+          <input type="text" id="docs-save-title" class="input-sm" data-i18n="saveDocTitlePlaceholder" placeholder="e.g. User API" style="font-size:14px;padding:8px 12px;flex:1;">
+          <select id="save-mode-select" class="input-sm" style="width:auto;font-size:12px;">
+            <option value="new" data-i18n="saveAsNew">Save as New</option>
+            <option value="append" data-i18n="appendToDoc">Append to Doc</option>
+          </select>
+        </div>
+        <div id="append-doc-picker" class="hidden" style="margin-top:6px;">
+          <select id="append-doc-select" class="input-sm" style="width:100%;font-size:12px;"></select>
+        </div>
       </div>
       <div id="docs-modal-content" class="docs-content"></div>
     </div>
     <div class="modal-footer">
-      <button id="btn-copy-docs" class="btn btn-outline">Copy</button>
-      <button id="btn-download-docs" class="btn btn-outline">Download .md</button>
-      <button id="btn-save-docs" class="btn btn-primary">Save Document</button>
+      <button id="btn-copy-docs" class="btn btn-outline" data-i18n="copy">Copy</button>
+      <button id="btn-download-docs" class="btn btn-outline" data-i18n="downloadMd">Download .md</button>
+      <button id="btn-save-docs" class="btn btn-primary" data-i18n="saveAsNew">Save as New</button>
+      <button id="btn-append-docs" class="btn btn-outline hidden" data-i18n="append">Append</button>
     </div>
     <div class="share-info hidden" id="share-info-box">
       <span class="share-url" id="share-url-text"></span>
-      <button id="btn-copy-share" class="btn btn-xs btn-outline">Copy</button>
+      <button id="btn-copy-share" class="btn btn-xs btn-outline" data-i18n="copy">Copy</button>
     </div>
   </div>
 </div>
 
 <div class="modal-overlay hidden" id="confirm-modal">
   <div class="modal modal-sm">
-    <div class="modal-header"><h2 id="confirm-title">Confirm</h2></div>
+    <div class="modal-header"><h2 id="confirm-title" data-i18n="confirmTitle">Confirm</h2></div>
     <div class="modal-body"><p id="confirm-message"></p></div>
     <div class="modal-footer">
-      <button id="confirm-cancel" class="btn btn-outline">Cancel</button>
-      <button id="confirm-ok" class="btn btn-danger">Delete</button>
+      <button id="confirm-cancel" class="btn btn-outline" data-i18n="cancel">Cancel</button>
+      <button id="confirm-ok" class="btn btn-danger" data-i18n="deleteConfirmTitle">Delete</button>
     </div>
   </div>
 </div>

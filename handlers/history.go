@@ -70,7 +70,8 @@ func (h *HistoryHandler) clear(w http.ResponseWriter, _ *http.Request) {
 
 func (h *HistoryHandler) updateNote(id string, w http.ResponseWriter, r *http.Request) {
 	var req struct {
-		Note       string             `json:"note"`
+		Note       *string            `json:"note,omitempty"`
+		Title      *string            `json:"title,omitempty"`
 		FormFields []models.FormField `json:"formFields,omitempty"`
 		URLEncoded []models.KV        `json:"urlEncoded,omitempty"`
 	}
@@ -78,7 +79,7 @@ func (h *HistoryHandler) updateNote(id string, w http.ResponseWriter, r *http.Re
 		http.Error(w, `{"error":"invalid request"}`, http.StatusBadRequest)
 		return
 	}
-	entry, err := h.storage.UpdateHistoryEntry(id, req.Note, req.FormFields, req.URLEncoded)
+	entry, err := h.storage.UpdateHistoryEntry(id, req.Note, req.Title, req.FormFields, req.URLEncoded)
 	if err != nil {
 		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusInternalServerError)
 		return

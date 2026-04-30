@@ -17,6 +17,7 @@ type HistoryEntry struct {
 	RespHeaders map[string]string `json:"respHeaders"`
 	Duration    int64             `json:"duration"`
 	Note        string            `json:"note,omitempty"`
+	Title       string            `json:"title,omitempty"`
 	RawRequest  string            `json:"rawRequest,omitempty"`
 	RawResponse string            `json:"rawResponse,omitempty"`
 }
@@ -63,10 +64,16 @@ type DocEntry struct {
 	Title      string    `json:"title"`
 	Content    string    `json:"content"`
 	HistoryIDs []string  `json:"historyIds"`
+	Shared     bool      `json:"shared"`
 	CreatedAt  time.Time `json:"createdAt"`
 	UpdatedAt  time.Time `json:"updatedAt"`
 }
 
 type Config struct {
 	Timeout int `json:"timeout"` // seconds, default 60
+}
+
+type CoreConfig struct {
+	Lang    string `json:"lang"`
+	Timeout int    `json:"timeout"`
 }

@@ -80,11 +80,13 @@ func (h *ProxyHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		contentType = writer.FormDataContentType()
 
 	case "url-form-encoded":
-		form := url.Values{}
+		var pairs []string
 		for _, f := range req.URLEncoded {
-			form.Set(f.Key, f.Value)
+			if f.Key != "" {
+				pairs = append(pairs, f.Key+"="+f.Value)
+			}
 		}
-		bodyReader = strings.NewReader(form.Encode())
+		bodyReader = strings.NewReader(strings.Join(pairs, "&"))
 		contentType = "application/x-www-form-urlencoded"
 
 	default:

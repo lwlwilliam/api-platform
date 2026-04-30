@@ -110,15 +110,18 @@ func (s *Storage) ClearHistory() error {
 	return s.SaveHistory([]models.HistoryEntry{})
 }
 
-func (s *Storage) UpdateHistoryEntry(id, note string, formFields []models.FormField, urlEncoded []models.KV) (*models.HistoryEntry, error) {
+func (s *Storage) UpdateHistoryEntry(id string, note, title *string, formFields []models.FormField, urlEncoded []models.KV) (*models.HistoryEntry, error) {
 	entries, err := s.LoadHistory()
 	if err != nil {
 		return nil, err
 	}
 	for i, e := range entries {
 		if e.ID == id {
-			if note != "" || len(formFields) > 0 || len(urlEncoded) > 0 {
-				entries[i].Note = note
+			if note != nil {
+				entries[i].Note = *note
+			}
+			if title != nil {
+				entries[i].Title = *title
 			}
 			if len(formFields) > 0 {
 				entries[i].FormFields = formFields
@@ -208,19 +211,36 @@ func generateAlias() string {
 	return hex.EncodeToString(b)
 }
 
-func (s *Storage) UpdateDoc(id, title string) (*models.DocEntry, error) {
+func (s *Storage) UpdateDoc(id, title, content string) (*models.DocEntry, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	doc, err := readSingleJSON[models.DocEntry](s.docPath(id))
 	if err != nil || doc == nil {
 		return nil, err
 	}
-	doc.Title = title
+	if title != "" {
+		doc.Title = title
+	}
+	if content != "" {
+		doc.Content = content
+	}
 	doc.UpdatedAt = time.Now()
 	if err := writeJSON(s.docPath(id), *doc); err != nil {
 		return nil, err
 	}
 	return doc, nil
+}
+
+func (s *Storage) UpdateDocContent(id, content string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	doc, err := readSingleJSON[models.DocEntry](s.docPath(id))
+	if err != nil || doc == nil {
+		return err
+	}
+	doc.Content = content
+	doc.UpdatedAt = time.Now()
+	return writeJSON(s.docPath(id), *doc)
 }
 
 func (s *Storage) DeleteDoc(id string) error {
@@ -234,6 +254,21 @@ func (s *Storage) DeleteDocs(ids []string) error {
 	defer s.mu.Unlock()
 	for _, id := range ids {
 		os.Remove(s.docPath(id))
+	}
+	return nil
+}
+
+func (s *Storage) SetDocsShared(ids []string, shared bool) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, id := range ids {
+		doc, err := readSingleJSON[models.DocEntry](s.docPath(id))
+		if err != nil || doc == nil {
+			continue
+		}
+		doc.Shared = shared
+		doc.UpdatedAt = time.Now()
+		writeJSON(s.docPath(id), *doc)
 	}
 	return nil
 }

@@ -25,6 +25,9 @@ import (
 //go:embed web/*
 var webFiles embed.FS
 
+//go:embed lang/*
+var langFiles embed.FS
+
 func main() {
 	devMode := flag.Bool("dev", false, "Serve static files from disk (development mode)")
 	port := flag.String("port", "8080", "Server port")
@@ -47,8 +50,16 @@ func main() {
 	historyHandler := handlers.NewHistoryHandler(store)
 	docsHandler := handlers.NewDocsHandler(store)
 
+	coreConfigHandler, err := handlers.SetupCoreConfig(execDir, langFiles)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to initialize core config: %v\n", err)
+		os.Exit(1)
+	}
+
 	mux := http.NewServeMux()
 
+	mux.HandleFunc("/api/core-config", withRecovery(coreConfigHandler.ServeHTTP))
+	mux.HandleFunc("/api/core-config/", withRecovery(coreConfigHandler.ServeHTTP))
 	mux.HandleFunc("/api/proxy", withRecovery(proxyHandler.Handle))
 	mux.HandleFunc("/api/history", withRecovery(historyHandler.ServeHTTP))
 	mux.HandleFunc("/api/history/", withRecovery(historyHandler.ServeHTTP))
@@ -89,7 +100,8 @@ func main() {
 			http.Error(w, "Not found", http.StatusNotFound)
 			return
 		}
-		if doc, err := store.GetDocByAlias(alias); err != nil || doc == nil {
+		doc, err := store.GetDocByAlias(alias)
+		if err != nil || doc == nil || !doc.Shared {
 			http.Error(w, "Not found", http.StatusNotFound)
 			return
 		}
