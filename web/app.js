@@ -139,7 +139,7 @@
     }).then(function() {
       applyLang();
       return Promise.all([loadHistory(), loadDocs()]);
-    }).then(function() { handleHash(); });
+    }).then(function() { handleHash(); document.getElementById('app').classList.add('ready'); });
   }
 
   // ==================== Theme ====================
@@ -872,14 +872,23 @@
         var he = histEntries.find(function(e) { return e.id === hid; });
         var body = t.split('\n').slice(1).join('\n');
         var bodyHtml = marked.parse(translateDocMd(body));
+        // Colorize status codes in blockquotes (e.g. > Status 200)
+        bodyHtml = bodyHtml.replace(
+          /<blockquote>\s*<p>([^<]+?)\s*(\d{3})\s*<\/p>\s*<\/blockquote>/g,
+          function(m, prefix, code) {
+            var sc = parseInt(code);
+            var cls = sc >= 200 && sc < 300 ? 'success' : (sc >= 400 ? 'error' : (sc >= 300 ? 'redirect' : 'info'));
+            return '<blockquote><p>' + prefix + ' <span class="response-status ' + cls + '" style="display:inline-block;vertical-align:middle">' + code + '</span></p></blockquote>';
+          }
+        );
         if (!readOnly) {
           bodyHtml = injectDescEdits(bodyHtml, he, hid);
         }
-        // Title field (on endpoint header) - read from markdown header, not history
-        var titleVal = docTitle;
+        // Title field (on endpoint header) - default to URL if no title
+        var titleVal = docTitle || url;
         var titleHtml = '';
         if (!readOnly) {
-          titleHtml = '<div class="endpoint-title-row"><span class="title-icon">📌</span><input class="title-edit" data-hid="' + hid + '" value="' + esc(titleVal) + '" placeholder=""></div>';
+          titleHtml = '<div class="endpoint-title-row"><span class="title-icon">📌</span><input class="title-edit" data-hid="' + hid + '" value="' + esc(docTitle) + '" placeholder="' + esc(url) + '"></div>';
         } else if (titleVal) {
           titleHtml = '<div class="endpoint-title-row"><span class="title-icon">📌</span><span class="title-text">' + esc(titleVal) + '</span></div>';
         }
@@ -900,7 +909,7 @@
       var headerCells = table.querySelectorAll('th');
       var descColIdx = -1;
       headerCells.forEach(function(th, ci) {
-        if (/description/i.test(th.textContent)) descColIdx = ci;
+        if (/description|描述/i.test(th.textContent)) descColIdx = ci;
       });
       if (descColIdx < 0) return;
 
@@ -980,7 +989,7 @@
     for (var si = 0; si < sections.length; si++) {
       if (sections[si].indexOf(marker) >= 0) {
         sections[si] = sections[si].replace(
-          /^(##\s+\d+\.\s+(?:GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\s+\S+?)(?:\s+-\s+.*)?$/m,
+          /^(##\s+\d+\.\s+(?:GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\s+\S+)(?:\s+-\s+.*)?$/m,
           function(m, header) { return title ? header + ' - ' + title : header; }
         );
         break;
@@ -996,22 +1005,22 @@
     for (var si = 0; si < sections.length; si++) {
       if (sections[si].indexOf(marker) >= 0) {
         var lines = sections[si].split('\n');
-        var inBody = false, tableLineCount = 0, rowCount = -1;
+        var currentTable = -1, rowCount = -1, inTable = false, headerLines = 0;
 
         for (var li = 0; li < lines.length; li++) {
           var line = lines[li];
-          if (/^###\s+(?:请求体|Request Body)/.test(line)) { inBody = true; continue; }
-          if (!inBody || !/^\|/.test(line.trim())) continue;
-
-          if (tableLineCount === 0) { tableLineCount++; continue; }
-          if (tableLineCount === 1) { tableLineCount++; continue; }
-
-          rowCount++;
-          if (rowCount === fieldIdx) {
-            var cells = line.split('|');
-            cells[cells.length - 2] = ' ' + value + ' ';
-            lines[li] = cells.join('|');
-            break;
+          if (/^\|/.test(line.trim())) {
+            if (!inTable) { inTable = true; headerLines = 1; currentTable++; rowCount = -1; continue; }
+            if (headerLines === 1) { headerLines = 2; continue; }
+            rowCount++;
+            if (currentTable === tableIdx && rowCount === fieldIdx) {
+              var cells = line.split('|');
+              cells[cells.length - 2] = ' ' + value + ' ';
+              lines[li] = cells.join('|');
+              break;
+            }
+          } else {
+            if (inTable) { inTable = false; headerLines = 0; }
           }
         }
         sections[si] = lines.join('\n');
@@ -1022,9 +1031,9 @@
   }
 
   function saveDescEdit(inp) {
-    var hid = inp.dataset.hid, idx = parseInt(inp.dataset.idx);
+    var hid = inp.dataset.hid, idx = parseInt(inp.dataset.idx), tbl = parseInt(inp.dataset.tbl) || 0;
     if (!hid || !state.viewingDocId || !state._currentDocMd) return;
-    state._currentDocMd = updateMarkdownDescription(state._currentDocMd, hid, 0, idx, inp.value);
+    state._currentDocMd = updateMarkdownDescription(state._currentDocMd, hid, tbl, idx, inp.value);
     fetch('/api/docs/' + state.viewingDocId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: state._currentDocMd }) }).catch(function() {});
   }
 
