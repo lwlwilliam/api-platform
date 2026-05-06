@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>API Platform</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
-<script>(function(){var t=localStorage.getItem('api-platform-theme')||'light';document.documentElement.setAttribute('data-theme',t);var l=document.createElement('link');l.id='hljs-theme';l.rel='stylesheet';l.href=t==='dark'?'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/atom-one-dark.min.css':'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/atom-one-light.min.css';document.head.appendChild(l);})()</script>
+<script>(function(){var t=localStorage.getItem('api-platform-theme')||'light';document.documentElement.setAttribute('data-theme',t);var l=document.createElement('link');l.id='hljs-theme';l.rel='stylesheet';l.href=t==='dark'?'/vendor/atom-one-dark.min.css':'/vendor/atom-one-light.min.css';document.head.appendChild(l);})()</script>
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -219,6 +219,11 @@
           </div>
         </div>
         <div class="doc-viewer-body" id="doc-viewer-content"></div>
+        <button class="doc-toc-toggle hidden" id="doc-toc-toggle" title="Table of Contents">☰</button>
+        <nav class="doc-toc hidden" id="doc-toc-panel">
+          <div class="doc-toc-header"><span data-i18n="toc">Table of Contents</span><button class="doc-toc-close" id="doc-toc-close">×</button></div>
+          <ul class="doc-toc-list" id="doc-toc-list"></ul>
+        </nav>
       </div>
     </div>
   </div>
@@ -272,8 +277,8 @@
 </div>
 <div id="toast" class="toast hidden"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/highlight.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="/vendor/highlight.min.js"></script>
+<script src="/vendor/marked.min.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>

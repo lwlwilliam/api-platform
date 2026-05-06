@@ -117,5 +117,6 @@
   "timeout_saved": "Timeout saved: {time}s",
   "historyNotFound": "History entry not found",
   "responseTruncated": "response truncated",
-  "requestLoadedClickSend": "Request loaded. Click Send."
+  "requestLoadedClickSend": "Request loaded. Click Send.",
+  "toc": "Table of Contents"
 }

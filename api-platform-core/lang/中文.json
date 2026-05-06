@@ -115,5 +115,6 @@
   "timeout_saved": "超时已保存：{time}秒",
   "historyNotFound": "未找到历史记录",
   "responseTruncated": "响应过长已截断",
-  "requestLoadedClickSend": "请求已加载，点击发送。"
+  "requestLoadedClickSend": "请先加载请求，然后点击发送。",
+  "toc": "目录"
 }

@@ -30,10 +30,10 @@ var langFiles embed.FS
 
 func main() {
 	devMode := flag.Bool("dev", false, "Serve static files from disk (development mode)")
-	port := flag.String("port", "8080", "Server port")
+	port := flag.String("port", "9999", "Server port")
 	flag.Parse()
 
-	if envPort := os.Getenv("PORT"); envPort != "" && *port == "8080" {
+	if envPort := os.Getenv("PORT"); envPort != "" && *port == "9999" {
 		*port = envPort
 	}
 
