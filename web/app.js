@@ -11,7 +11,7 @@
     response: null, activeRespTab: 'body', activeHistoryId: null,
     selectedHistoryIds: new Set(), selectedDocIds: new Set(),
     sidebarTab: 'history', viewingDocId: null, currentDocMd: '',
-    theme: 'light', responseViewMode: 'pretty', savedDocId: null,
+    theme: 'light', responseViewMode: 'pretty',
     configTimeout: 60, _confirmResolve: null,
     _urlEncodedRawMode: false,
     _lang: 'En', _translations: {},
@@ -112,10 +112,10 @@
       'panel-history','panel-docs','docs-list','btn-docs-select-all','btn-docs-deselect-all','btn-docs-batch-share','btn-docs-batch-unshare','btn-docs-batch-delete',
       'view-request','view-doc','doc-viewer-title','doc-viewer-content',
       'btn-back-editor','btn-copy-doc-link','btn-toggle-share','btn-download-doc',
-      'docs-modal','docs-save-title','docs-modal-content','btn-copy-docs','btn-download-docs','btn-save-docs',
+      'docs-modal','docs-save-title','docs-modal-content','btn-download-docs','btn-save-docs',
       'save-mode-select','append-doc-picker','append-doc-select','btn-append-docs',
       'btn-theme','toast','hljs-theme',
-      'btn-view-pretty','btn-view-raw','share-info-box','share-url-text','btn-copy-share',
+      'btn-view-pretty','btn-view-raw',
       'config-timeout', 'btn-save-config', 'btn-clear', 'lang-select',
       'confirm-modal','confirm-title','confirm-message','confirm-cancel','confirm-ok',
       'doc-toc-toggle','doc-toc-panel','doc-toc-list','doc-toc-close',
@@ -264,7 +264,7 @@
 
     els.docsModalClose.addEventListener('click', closeDocsModal);
     els.docsModal.addEventListener('click', function(e) { if (e.target === els.docsModal) closeDocsModal(); });
-    els.btnCopyDocs.addEventListener('click', copyDocs);
+
     els.btnDownloadDocs.addEventListener('click', downloadDocs);
     els.btnSaveDocs.addEventListener('click', saveDocs);
     els.btnAppendDocs.addEventListener('click', appendDocs);
@@ -274,7 +274,7 @@
       els.btnSaveDocs.classList.toggle('hidden', isAppend);
       els.btnAppendDocs.classList.toggle('hidden', !isAppend);
     });
-    els.btnCopyShare.addEventListener('click', function() { if (state.savedDocId) copyShareLink(state.savedDocId); });
+
 
     els.btnBackEditor.addEventListener('click', closeDocViewer);
     els.btnCopyDocLink.addEventListener('click', function() { copyShareLink(state.viewingDocId); });
@@ -1138,7 +1138,7 @@
       opt.textContent = d.title;
       picker.appendChild(opt);
     });
-    els.docsModal.classList.remove('hidden'); els.shareInfoBox.classList.add('hidden');
+    els.docsModal.classList.remove('hidden');
     els.docsModalContent.innerHTML = '<div style="text-align:center;padding:40px;"><span class="spinner"></span> ' + _t('sending') + '</div>';
     try {
       var r = await fetch('/api/docs/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: Array.from(state.selectedHistoryIds) }) });
@@ -1147,7 +1147,7 @@
       rehighlight();
     } catch(e) { els.docsModalContent.innerHTML = '<p style="color:var(--danger)">' + _t('failed') + ': ' + e.message + '</p>'; }
   }
-  function closeDocsModal() { els.docsModal.classList.add('hidden'); els.shareInfoBox.classList.add('hidden'); state.currentDocMd = ''; state.savedDocId = null; state._autoDocTitle = null; }
+  function closeDocsModal() { els.docsModal.classList.add('hidden'); state.currentDocMd = ''; state._autoDocTitle = null; }
 
   async function appendDocs() {
     var docId = els.appendDocSelect.value;
@@ -1162,7 +1162,7 @@
       showToast(_t('savedNotShared'), 'success');
     } catch(e) { showToast(_t('failed'), 'error'); }
   }
-  async function copyDocs() { try { var r = await fetch('/api/docs/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: Array.from(state.selectedHistoryIds) }) }); await navigator.clipboard.writeText(await r.text()); showToast(_t('copied'), 'success'); } catch(e) { showToast(_t('failed'), 'error'); } }
+
   async function downloadDocs() { try { var r = await fetch('/api/docs/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: Array.from(state.selectedHistoryIds) }) }); var b = new Blob([await r.text()], { type: 'text/markdown' }); var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'api-docs.md'; a.click(); URL.revokeObjectURL(a.href); showToast(_t('downloaded'), 'success'); } catch(e) { showToast(_t('failed'), 'error'); } }
   async function saveDocs() {
     var title = els.docsSaveTitle.value.trim();
@@ -1173,8 +1173,7 @@
     }
     try {
       var r = await fetch('/api/docs/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: title, historyIds: Array.from(state.selectedHistoryIds) }) });
-      var doc = await r.json(); state.savedDocId = doc.id;
-      els.shareInfoBox.classList.add('hidden');
+      await r.json();
       state.selectedHistoryIds.clear(); renderHistory(); showToast(_t('savedNotShared'), 'success');
       state.sidebarTab = 'docs'; switchSidebar('docs'); await loadDocs();
     } catch(e) { showToast(_t('failed') + ': ' + e.message, 'error'); }

@@ -1,5 +1,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+.hidden { display: none; }
+
 /* ========== Design Tokens ========== */
 :root {
   --bg-primary: #080c17;
@@ -398,6 +400,7 @@ body {
   position: relative; overflow: hidden;
 }
 .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn.hidden { display: none; }
 .btn-primary {
   background: linear-gradient(135deg, var(--accent) 0%, #93c5fd 50%, #7dd3fc 100%);
   color: #fff; border-color: transparent;
