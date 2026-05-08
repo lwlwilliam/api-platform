@@ -76,6 +76,7 @@ func (h *ProxyHandler) Handle(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		writer.Close()
+		req.Body = buf.String()
 		bodyReader = buf
 		contentType = writer.FormDataContentType()
 
@@ -215,13 +216,17 @@ func buildRawRequestStr(req models.ProxyRequest) string {
 		}
 		sb.WriteString(strings.Join(parts, "&"))
 	} else if req.BodyType == "form-data" {
-		sb.WriteString("[multipart/form-data]\n")
-		for _, f := range req.FormFields {
-			if f.Key != "" {
-				if f.IsFile {
-					sb.WriteString(f.Key + ": [file] " + f.FileName + "\n")
-				} else {
-					sb.WriteString(f.Key + ": " + f.Value + "\n")
+		if req.Body != "" {
+			sb.WriteString(req.Body)
+		} else {
+			sb.WriteString("[multipart/form-data]\n")
+			for _, f := range req.FormFields {
+				if f.Key != "" {
+					if f.IsFile {
+						sb.WriteString(f.Key + ": [file] " + f.FileName + "\n")
+					} else {
+						sb.WriteString(f.Key + ": " + f.Value + "\n")
+					}
 				}
 			}
 		}
