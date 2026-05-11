@@ -5,7 +5,7 @@
   const state = {
     method: 'GET', url: '',
     headers: [{ key: 'User-Agent', value: 'API-Platform/1.0', _default: true }, { key: '', value: '' }],
-    bodyType: 'raw', rawContentType: 'application/json', rawBody: '',
+    bodyType: 'raw', rawBody: '',
     formFields: [{ key: '', value: '', isFile: false, fileName: '', content: '', description: '' }],
     urlEncoded: [{ key: '', value: '', description: '' }],
     response: null, activeRespTab: 'body', activeHistoryId: null,
@@ -13,7 +13,7 @@
     sidebarTab: 'history', viewingDocId: null, currentDocMd: '',
     theme: 'light', responseViewMode: 'pretty',
     configTimeout: 60, _confirmResolve: null,
-    _urlEncodedRawMode: false,
+    _urlEncodedRawMode: false, _formDataRawMode: false,
     _lang: 'En', _translations: {},
   };
 
@@ -104,7 +104,7 @@
     const ids = [
       'method-select','url-input','btn-send','request-tabs','tab-headers','tab-body',
       'headers-editor','btn-add-header','body-raw','body-formdata','body-urlencoded',
-      'raw-content-type','raw-body','formdata-editor','btn-add-formdata',
+      'raw-body','formdata-editor','btn-add-formdata','btn-toggle-formdata-mode','formdata-raw',
       'urlencoded-editor','btn-add-urlencoded','urlencoded-raw','btn-toggle-urlencoded-mode','response-status','response-time','response-size',
       'response-body','response-headers-view','response-request-view','response-raw-view',
       'response-headers-content','response-request-content','response-raw-content',
@@ -140,6 +140,9 @@
       return loadTranslations();
     }).then(function() {
       applyLang();
+      renderHeaders();
+      renderFormFields();
+      renderUrlEncoded();
       return Promise.all([loadHistory(), loadDocs()]);
     }).then(function() { handleHash(); document.getElementById('app').classList.add('ready'); });
   }
@@ -206,12 +209,12 @@
       });
     });
 
-    els.rawContentType.addEventListener('change', function() { state.rawContentType = els.rawContentType.value; });
     els.rawBody.addEventListener('input', function() { state.rawBody = els.rawBody.value; });
     els.btnAddHeader.addEventListener('click', function() { syncAllInputs(); state.headers.push({ key: '', value: '' }); renderHeaders(); });
     els.btnAddFormdata.addEventListener('click', function() { syncAllInputs(); state.formFields.push({ key: '', value: '', isFile: false, fileName: '', content: '', description: '' }); renderFormFields(); });
     els.btnAddUrlencoded.addEventListener('click', function() { syncAllInputs(); state.urlEncoded.push({ key: '', value: '', description: '' }); renderUrlEncoded(); });
     els.btnToggleUrlencodedMode.addEventListener('click', toggleUrlEncodedMode);
+    els.btnToggleFormdataMode.addEventListener('click', toggleFormDataMode);
 
     // Config save
     if (els.btnSaveConfig) els.btnSaveConfig.addEventListener('click', saveConfig);
@@ -346,14 +349,18 @@
       var k = row.querySelector('.kv-key'), v = row.querySelector('.kv-value');
       if (state.headers[i]) { if (k) state.headers[i].key = k.value; if (v) state.headers[i].value = v.value; }
     });
-    els.formdataEditor.querySelectorAll('.kv-row').forEach(function(row, i) {
-      var k = row.querySelector('.kv-key'), v = row.querySelector('.form-text-value'), d = row.querySelector('.form-desc');
-      if (state.formFields[i]) {
-        if (k) state.formFields[i].key = k.value;
-        if (v && !state.formFields[i].isFile) state.formFields[i].value = v.value;
-        if (d) state.formFields[i].description = d.value;
-      }
-    });
+    if (!state._formDataRawMode) {
+      els.formdataEditor.querySelectorAll('.kv-row').forEach(function(row, i) {
+        var k = row.querySelector('.kv-key'), v = row.querySelector('.form-text-value'), d = row.querySelector('.form-desc');
+        if (state.formFields[i]) {
+          if (k) state.formFields[i].key = k.value;
+          if (v && !state.formFields[i].isFile) state.formFields[i].value = v.value;
+          if (d) state.formFields[i].description = d.value;
+        }
+      });
+    } else {
+      parseFormDataRaw();
+    }
     if (!state._urlEncodedRawMode) {
       els.urlencodedEditor.querySelectorAll('.kv-row').forEach(function(row, i) {
         var k = row.querySelector('.kv-key'), v = row.querySelector('.kv-value'), d = row.querySelector('.form-desc');
@@ -395,7 +402,7 @@
     syncAllInputs();
     state.url = url; state.method = els.methodSelect.value;
     collectHeaders(); collectFormFields(); collectUrlEncoded();
-    state.rawBody = els.rawBody.value; state.rawContentType = els.rawContentType.value;
+    state.rawBody = els.rawBody.value;
 
     els.btnSend.disabled = true; els.btnSend.innerHTML = '<span class="spinner"></span> ' + _t('sending');
     els.responseStatus.textContent = ''; els.responseTime.textContent = ''; els.responseSize.textContent = '';
@@ -423,17 +430,22 @@
     });
   }
   function collectFormFields() {
+    if (state._formDataRawMode) {
+      parseFormDataRaw();
+      return;
+    }
     state.formFields = [];
     els.formdataEditor.querySelectorAll('.kv-row').forEach(function(row) {
       var key = row.querySelector('.kv-key').value.trim();
       var ti = row.querySelector('.form-text-value');
       var fi = row.querySelector('.form-file-input');
+      var pf = row.querySelector('.btn-pick-file');
       var di = row.querySelector('.form-desc');
-      var isF = !fi.classList.contains('hidden');
+      var isF = pf && !pf.classList.contains('hidden');
       var idx = row.dataset.idx;
       var desc = di ? di.value : '';
       if (isF) {
-        state.formFields.push({ key: key, value: '', isFile: true, fileName: fi.files && fi.files[0] ? fi.files[0].name : '', content: (state._formFileContents && state._formFileContents[idx]) || '', description: desc });
+        state.formFields.push({ key: key, value: '', isFile: true, fileName: fi && fi.files && fi.files[0] ? fi.files[0].name : '', content: (state._formFileContents && state._formFileContents[idx]) || '', description: desc });
       } else {
         state.formFields.push({ key: key, value: ti ? ti.value : '', isFile: false, fileName: '', content: '', description: desc });
       }
@@ -457,7 +469,7 @@
     state.headers.forEach(function(h) { if (h.key) { b.headers[h.key] = h.value; seen[h.key.toLowerCase()] = true; } });
     // Auto-compute Content-Length for raw body
     if (state.bodyType === 'raw' && state.rawBody) {
-      if (!seen['content-type']) b.headers['Content-Type'] = state.rawContentType;
+      if (!seen['content-type']) b.headers['Content-Type'] = 'application/json';
       if (!seen['content-length']) b.headers['Content-Length'] = String(new Blob([state.rawBody]).size);
       b.body = state.rawBody;
     } else if (state.bodyType === 'form-data') {
@@ -474,11 +486,11 @@
     state.activeHistoryId = null;
     if (window.location.hash.startsWith('#/history/')) window.location.hash = '';
     state.headers = [{ key: 'User-Agent', value: 'API-Platform/1.0', _default: true }, { key: '', value: '' }]; renderHeaders();
-    state.bodyType = 'raw'; state.rawBody = ''; state.rawContentType = 'application/json';
+    state.bodyType = 'raw'; state.rawBody = '';
     els.rawBody.value = '';
     document.querySelectorAll('.body-type-tab').forEach(function(t) { t.classList.toggle('active', t.dataset.btype === 'raw'); });
     els.bodyRaw.classList.remove('hidden'); els.bodyFormdata.classList.add('hidden'); els.bodyUrlencoded.classList.add('hidden');
-    state.formFields = [{ key: '', value: '', isFile: false, fileName: '', content: '', description: '' }]; renderFormFields();
+    state._formDataRawMode = false; state.formFields = [{ key: '', value: '', isFile: false, fileName: '', content: '', description: '' }]; renderFormFields();
     state._urlEncodedRawMode = false; state.urlEncoded = [{ key: '', value: '', description: '' }]; renderUrlEncoded();
     els.requestTabs.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
     var ht = els.requestTabs.querySelector('[data-tab="headers"]');
@@ -637,7 +649,7 @@
     if (entry.formFields && entry.formFields.length) {
       state.formFields = entry.formFields.map(function(f) { return { key: f.key, value: f.value || '', isFile: f.isFile || false, fileName: f.fileName || '', content: f.content || '', description: f.description || '' }; });
     } else { state.formFields = [{ key: '', value: '', isFile: false, fileName: '', content: '', description: '' }]; }
-    renderFormFields();
+    state._formDataRawMode = false; renderFormFields();
     if (entry.urlEncoded && entry.urlEncoded.length) {
       state.urlEncoded = entry.urlEncoded.map(function(kv) { return { key: kv.key, value: kv.value || '', description: kv.description || '' }; });
     } else { state.urlEncoded = [{ key: '', value: '', description: '' }]; }
@@ -669,7 +681,7 @@
   function ensureContentTypeHeader(bodyType) {
     var ct = null;
     if (bodyType === 'raw') {
-      ct = state.rawContentType || 'application/json';
+      ct = 'application/json';
     } else if (bodyType === 'url-form-encoded') {
       ct = 'application/x-www-form-urlencoded';
     }
@@ -691,6 +703,21 @@
   }
 
   function renderFormFields() {
+    if (state._formDataRawMode) {
+      els.formdataEditor.classList.add('hidden');
+      els.btnAddFormdata.classList.add('hidden');
+      els.formdataRaw.classList.remove('hidden');
+      els.btnToggleFormdataMode.textContent = _t('tableEdit');
+      var raw = formDataToRaw(state.formFields);
+      if (els.formdataRaw.querySelector('textarea').value === '' || raw !== '') {
+        els.formdataRaw.querySelector('textarea').value = raw;
+      }
+      return;
+    }
+    els.formdataEditor.classList.remove('hidden');
+    els.btnAddFormdata.classList.remove('hidden');
+    els.formdataRaw.classList.add('hidden');
+    els.btnToggleFormdataMode.textContent = _t('bulkEdit');
     var _pFKey = _t('key'), _pFVal = _t('value'), _pFDesc = _t('desc');
     state._formFileContents = state._formFileContents || {};
     els.formdataEditor.innerHTML = state.formFields.map(function(f, i) {
@@ -699,7 +726,8 @@
         '<input type="text" class="kv-key" placeholder="' + _pFKey + '" value="' + esc(f.key) + '" data-idx="' + i + '" data-field="key">' +
         '<div class="form-value-group">' +
           '<input type="text" class="kv-value form-text-value ' + (isF ? 'hidden' : '') + '" placeholder="' + _pFVal + '" value="' + esc(isF ? '' : f.value) + '" data-idx="' + i + '" data-field="value">' +
-          '<input type="file" class="form-file-input ' + (isF ? '' : 'hidden') + '" data-idx="' + i + '">' +
+          '<input type="file" class="form-file-input hidden" data-idx="' + i + '">' +
+          '<button class="btn btn-xs btn-pick-file ' + (isF ? '' : 'hidden') + '" data-idx="' + i + '">' + _t('chooseFile') + '</button>' +
           '<span class="form-file-name ' + (isF && f.fileName ? '' : 'hidden') + '">' + esc(f.fileName || '') + '</span>' +
           '<button class="btn btn-xs btn-toggle-file" data-idx="' + i + '" title="' + (isF ? _t('switchToText') : _t('switchToFile')) + '">' + (isF ? '✎' : '📁') + '</button>' +
           '<input type="text" class="form-desc" placeholder="' + _pFDesc + '" value="' + esc(f.description || '') + '" data-idx="' + i + '" data-field="description" style="width:80px;font-size:11px;">' +
@@ -709,8 +737,9 @@
     els.formdataEditor.querySelectorAll('.kv-key').forEach(function(inp) { inp.addEventListener('input', function() { if (state.formFields[+inp.dataset.idx]) state.formFields[+inp.dataset.idx].key = inp.value; }); });
     els.formdataEditor.querySelectorAll('.form-text-value').forEach(function(inp) { inp.addEventListener('input', function() { if (state.formFields[+inp.dataset.idx]) state.formFields[+inp.dataset.idx].value = inp.value; }); });
     els.formdataEditor.querySelectorAll('.form-desc').forEach(function(inp) { inp.addEventListener('input', function() { if (state.formFields[+inp.dataset.idx]) state.formFields[+inp.dataset.idx].description = inp.value; }); });
+    els.formdataEditor.querySelectorAll('.btn-pick-file').forEach(function(btn) { btn.addEventListener('click', function() { var i = +btn.dataset.idx; var r = btn.closest('.kv-row'); var fi = r.querySelector('.form-file-input'); if (fi) fi.click(); }); });
     els.formdataEditor.querySelectorAll('.form-file-input').forEach(function(inp) { inp.addEventListener('change', function() { var i = +inp.dataset.idx; var f = inp.files[0]; if (f && state.formFields[i]) { state.formFields[i].fileName = f.name; readFileAsBase64(f).then(function(b64) { state._formFileContents[i] = b64; if (state.formFields[i]) state.formFields[i].content = b64; }); var r = inp.closest('.kv-row'); var ne = r.querySelector('.form-file-name'); ne.textContent = f.name; ne.classList.remove('hidden'); } }); });
-    els.formdataEditor.querySelectorAll('.btn-toggle-file').forEach(function(btn) { btn.addEventListener('click', function() { syncAllInputs(); var i = +btn.dataset.idx; var r = btn.closest('.kv-row'); var ti = r.querySelector('.form-text-value'); var fi = r.querySelector('.form-file-input'); var ne = r.querySelector('.form-file-name'); var cur = !fi.classList.contains('hidden');       if (cur) { fi.classList.add('hidden'); ne.classList.add('hidden'); ti.classList.remove('hidden'); btn.textContent = '📁'; btn.title = _t('switchToFile'); if (state.formFields[i]) { state.formFields[i].isFile = false; state.formFields[i].fileName = ''; state.formFields[i].content = ''; delete state._formFileContents[i]; } } else { ti.classList.add('hidden'); fi.classList.remove('hidden'); btn.textContent = '✎'; btn.title = _t('switchToText'); if (state.formFields[i]) { state.formFields[i].isFile = true; state.formFields[i].value = ''; } } }); });
+    els.formdataEditor.querySelectorAll('.btn-toggle-file').forEach(function(btn) { btn.addEventListener('click', function() { syncAllInputs(); var i = +btn.dataset.idx; var r = btn.closest('.kv-row'); var ti = r.querySelector('.form-text-value'); var pf = r.querySelector('.btn-pick-file'); var ne = r.querySelector('.form-file-name'); var isF = !pf.classList.contains('hidden'); if (isF) { pf.classList.add('hidden'); ne.classList.add('hidden'); ti.classList.remove('hidden'); btn.textContent = '📁'; btn.title = _t('switchToFile'); if (state.formFields[i]) { state.formFields[i].isFile = false; state.formFields[i].fileName = ''; state.formFields[i].content = ''; delete state._formFileContents[i]; } } else { ti.classList.add('hidden'); pf.classList.remove('hidden'); btn.textContent = '✎'; btn.title = _t('switchToText'); if (state.formFields[i]) { state.formFields[i].isFile = true; state.formFields[i].value = ''; } } }); });
     els.formdataEditor.querySelectorAll('.kv-remove').forEach(function(btn) { btn.addEventListener('click', function() { syncAllInputs(); var i = +btn.dataset.idx; if (isNaN(i)) return; if (state.formFields.length > 1) { state.formFields.splice(i, 1); } else { state.formFields[0] = { key: '', value: '', isFile: false, fileName: '', content: '', description: '' }; } renderFormFields(); }); });
   }
 
@@ -770,6 +799,40 @@
     syncAllInputs();
     state._urlEncodedRawMode = !state._urlEncodedRawMode;
     renderUrlEncoded();
+  }
+
+  function formDataToRaw(arr) {
+    return arr.filter(function(f) { return f.key && !f.isFile; }).map(function(f) {
+      return f.key + '=' + f.value;
+    }).join('&');
+  }
+
+  function parseFormDataRaw() {
+    var raw = els.formdataRaw.querySelector('textarea').value;
+    state.formFields = [];
+    raw.split('&').forEach(function(pair) {
+      pair = pair.trim();
+      if (!pair) return;
+      var eq = pair.indexOf('=');
+      if (eq < 0) {
+        state.formFields.push({ key: pair, value: '', isFile: false, fileName: '', content: '', description: '' });
+      } else {
+        state.formFields.push({
+          key: pair.substring(0, eq),
+          value: pair.substring(eq + 1),
+          isFile: false, fileName: '', content: '', description: ''
+        });
+      }
+    });
+    if (!state.formFields.length) {
+      state.formFields.push({ key: '', value: '', isFile: false, fileName: '', content: '', description: '' });
+    }
+  }
+
+  function toggleFormDataMode() {
+    syncAllInputs();
+    state._formDataRawMode = !state._formDataRawMode;
+    renderFormFields();
   }
 
   // ==================== Documents ====================

@@ -128,13 +128,6 @@
             </div>
 
             <div id="body-raw" class="body-panel">
-              <select id="raw-content-type" class="input-sm">
-                <option value="application/json">JSON</option>
-                <option value="application/xml">XML</option>
-                <option value="text/plain">Text</option>
-                <option value="text/html">HTML</option>
-                <option value="application/x-www-form-urlencoded">Form URL Encoded</option>
-              </select>
               <textarea id="raw-body" class="body-textarea" placeholder='{"key": "value"}'></textarea>
             </div>
 
@@ -145,6 +138,7 @@
                   <div class="form-value-group">
                     <input type="text" class="kv-value form-text-value" placeholder="Value" value="">
                     <input type="file" class="form-file-input hidden">
+                    <button class="btn btn-xs btn-pick-file hidden">Choose File</button>
                     <span class="form-file-name"></span>
                     <button class="btn btn-xs btn-toggle-file" title="Switch to file">📁</button>
                   </div>
@@ -152,6 +146,12 @@
                 </div>
               </div>
               <button id="btn-add-formdata" class="btn btn-sm btn-link">+ Add Field</button>
+              <div class="bulk-toggle-bar">
+                <button id="btn-toggle-formdata-mode" class="btn btn-sm btn-link">Bulk Edit</button>
+              </div>
+              <div id="formdata-raw" class="hidden">
+                <textarea class="body-textarea" placeholder="key1=value1&key2=value2" style="height:120px;"></textarea>
+              </div>
             </div>
 
             <div id="body-urlencoded" class="body-panel hidden">

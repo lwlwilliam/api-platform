@@ -103,6 +103,7 @@
   "switchToDark": "切换到深色",
   "switchToText": "切换到文本输入",
   "switchToFile": "切换到文件输入",
+  "chooseFile": "选择文件",
   "pleaseEnterUrl": "请输入 URL",
   "deletedEntries": "已删除 {count} 条记录",
   "deletedDocs": "文档已删除",

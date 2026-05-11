@@ -351,7 +351,6 @@ body {
   transition: all var(--transition); line-height: 1.6;
 }
 .body-textarea:focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--accent-subtle), 0 0 12px rgba(96,165,250,0.08); }
-#raw-content-type { margin-bottom: 12px; }
 
 /* ========== KV Editor ========== */
 .kv-editor { display: flex; flex-direction: column; gap: 6px; }
@@ -451,6 +450,9 @@ body {
 
 .save-mode-row { display: flex; gap: 8px; align-items: center; }
 .btn-toggle-file { padding: 4px 7px; font-size: 14px; flex-shrink: 0; border-radius: var(--radius-xs); }
+.btn-pick-file { padding: 4px 10px; font-size: 12px; flex-shrink: 0; border-radius: var(--radius-xs); background: var(--accent); color: #fff; border: none; cursor: pointer; white-space: nowrap; transition: all var(--transition); }
+.btn-pick-file:hover { opacity: 0.85; }
+.btn-pick-file.hidden { display: none; }
 
 #btn-theme {
   font-size: 17px; color: var(--text-secondary); background: var(--bg-tertiary);

@@ -105,6 +105,7 @@
   "switchToDark": "Switch to dark",
   "switchToText": "Switch to text",
   "switchToFile": "Switch to file",
+  "chooseFile": "Choose File",
   "pleaseEnterUrl": "Please enter a URL",
   "deletedEntries": "Deleted {count} entry(s)",
   "deletedDocs": "Documents deleted",
